@@ -8,6 +8,7 @@ import java.awt.FlowLayout;
 import java.awt.Font;
 import java.awt.GridBagConstraints;
 import java.awt.GridBagLayout;
+import java.awt.GridLayout;
 import java.awt.Insets;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
@@ -18,9 +19,9 @@ import javax.swing.JButton;
 import javax.swing.JComboBox;
 import javax.swing.JFrame;
 import javax.swing.JLabel;
-import javax.swing.JTabbedPane;
 import javax.swing.JPanel;
 import javax.swing.JScrollPane;
+import javax.swing.JTabbedPane;
 import javax.swing.JTable;
 import javax.swing.JTextField;
 import javax.swing.SwingConstants;
@@ -32,23 +33,30 @@ public class VentanaPrincipal extends JFrame {
     private final JTextField txtPlaca;
     private final JComboBox<String> cmbTipoVehiculo;
     private final JLabel lblEstado;
+    private final JLabel lblSeleccionActivo;
+    private final JLabel lblSeleccionHistorial;
+    private final JLabel lblMontoSalida;
+    private final JLabel lblResumenActivos;
+    private final JLabel lblResumenHistorial;
     private final JTable tblVehiculosActivos;
     private final JTable tblHistorial;
     private final DefaultTableModel modeloActivos;
     private final DefaultTableModel modeloHistorial;
-    private final JLabel lblSeleccion;
-    private final JLabel lblMontoSalida;
     private ParqueoService parqueoService;
     private int idRegistroSeleccionado;
+    private int idHistorialSeleccionado;
 
     public VentanaPrincipal() {
         this.txtPlaca = new JTextField(16);
         this.cmbTipoVehiculo = new JComboBox<>(new String[]{
             "Seleccione un tipo", "Carro", "Moto"
         });
-        this.lblEstado = new JLabel("Sistema listo para registrar ingresos y salidas.");
-        this.lblSeleccion = new JLabel("Vehiculo seleccionado para salida: ninguno");
+        this.lblEstado = new JLabel("Sistema listo para registrar ingresos, salidas y gestionar historial.");
+        this.lblSeleccionActivo = new JLabel("Vehiculo activo seleccionado: ninguno");
+        this.lblSeleccionHistorial = new JLabel("Registro historico seleccionado: ninguno");
         this.lblMontoSalida = new JLabel("Monto calculado en la ultima salida: no disponible");
+        this.lblResumenActivos = new JLabel("Activos: 0");
+        this.lblResumenHistorial = new JLabel("Historial: 0");
         this.modeloActivos = new DefaultTableModel(
                 new Object[]{"ID", "Placa", "Tipo", "Fecha", "Hora", "Estado"}, 0) {
             @Override
@@ -66,6 +74,7 @@ public class VentanaPrincipal extends JFrame {
         this.tblVehiculosActivos = new JTable(modeloActivos);
         this.tblHistorial = new JTable(modeloHistorial);
         this.idRegistroSeleccionado = -1;
+        this.idHistorialSeleccionado = -1;
 
         inicializarServicio();
         inicializarVentana();
@@ -81,13 +90,13 @@ public class VentanaPrincipal extends JFrame {
     }
 
     private void inicializarVentana() {
-        setTitle("Parqueo Publico - Registro de Ingresos");
+        setTitle("Parqueo Publico - Gestion de Ingresos y Salidas");
         setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
-        setSize(900, 560);
-        setMinimumSize(new Dimension(820, 500));
+        setSize(1080, 680);
+        setMinimumSize(new Dimension(980, 620));
         setLocationRelativeTo(null);
-        setLayout(new BorderLayout(14, 14));
-        getContentPane().setBackground(new Color(236, 242, 247));
+        setLayout(new BorderLayout(16, 16));
+        getContentPane().setBackground(new Color(241, 245, 248));
 
         add(construirEncabezado(), BorderLayout.NORTH);
         add(construirContenidoCentral(), BorderLayout.CENTER);
@@ -96,15 +105,14 @@ public class VentanaPrincipal extends JFrame {
 
     private JPanel construirEncabezado() {
         JPanel panel = new JPanel(new BorderLayout());
-        panel.setBackground(new Color(25, 72, 106));
-        panel.setBorder(BorderFactory.createEmptyBorder(18, 24, 18, 24));
+        panel.setBackground(new Color(24, 63, 95));
+        panel.setBorder(BorderFactory.createEmptyBorder(20, 26, 20, 26));
 
         JLabel lblTitulo = new JLabel("Sistema de Parqueo Publico");
         lblTitulo.setFont(new Font("Segoe UI", Font.BOLD, 24));
         lblTitulo.setForeground(Color.WHITE);
 
-        JLabel lblSubtitulo = new JLabel("Version 1.0 - Registro de ingreso de vehiculos");
-        lblSubtitulo.setText("Version 1.1 - Ingreso, salida e historial de vehiculos");
+        JLabel lblSubtitulo = new JLabel("Version 1.2 - Interfaz mejorada, validaciones y gestion de historial");
         lblSubtitulo.setFont(new Font("Segoe UI", Font.PLAIN, 14));
         lblSubtitulo.setForeground(new Color(214, 231, 242));
 
@@ -118,13 +126,11 @@ public class VentanaPrincipal extends JFrame {
     }
 
     private JPanel construirContenidoCentral() {
-        JPanel panelCentral = new JPanel(new BorderLayout(14, 14));
+        JPanel panelCentral = new JPanel(new BorderLayout(16, 16));
         panelCentral.setOpaque(false);
-        panelCentral.setBorder(BorderFactory.createEmptyBorder(0, 14, 0, 14));
-
+        panelCentral.setBorder(BorderFactory.createEmptyBorder(0, 16, 0, 16));
         panelCentral.add(construirPanelFormulario(), BorderLayout.WEST);
         panelCentral.add(construirPanelTablas(), BorderLayout.CENTER);
-
         return panelCentral;
     }
 
@@ -133,9 +139,9 @@ public class VentanaPrincipal extends JFrame {
         panelFormulario.setBackground(Color.WHITE);
         panelFormulario.setBorder(BorderFactory.createCompoundBorder(
                 BorderFactory.createLineBorder(new Color(202, 213, 222)),
-                BorderFactory.createEmptyBorder(18, 18, 18, 18)
+                BorderFactory.createEmptyBorder(20, 20, 20, 20)
         ));
-        panelFormulario.setPreferredSize(new Dimension(320, 420));
+        panelFormulario.setPreferredSize(new Dimension(340, 520));
 
         GridBagConstraints gbc = new GridBagConstraints();
         gbc.gridx = 0;
@@ -145,7 +151,7 @@ public class VentanaPrincipal extends JFrame {
         gbc.insets = new Insets(8, 0, 8, 0);
         gbc.weightx = 1.0;
 
-        JLabel lblSeccion = new JLabel("Registrar ingreso");
+        JLabel lblSeccion = new JLabel("Acciones del sistema");
         lblSeccion.setFont(new Font("Segoe UI", Font.BOLD, 18));
         panelFormulario.add(lblSeccion, gbc);
 
@@ -168,7 +174,7 @@ public class VentanaPrincipal extends JFrame {
         panelFormulario.add(cmbTipoVehiculo, gbc);
 
         gbc.gridy++;
-        JLabel lblAyuda = new JLabel("<html>La hora de entrada se registra automaticamente.</html>");
+        JLabel lblAyuda = new JLabel("<html>La hora se registra automaticamente. Selecciona un vehiculo activo para procesar su salida o un registro historico para eliminarlo.</html>");
         lblAyuda.setFont(new Font("Segoe UI", Font.PLAIN, 13));
         lblAyuda.setForeground(new Color(88, 103, 117));
         panelFormulario.add(lblAyuda, gbc);
@@ -183,11 +189,6 @@ public class VentanaPrincipal extends JFrame {
         panelFormulario.add(btnRegistrar, gbc);
 
         gbc.gridy++;
-        lblSeleccion.setFont(new Font("Segoe UI", Font.PLAIN, 13));
-        lblSeleccion.setForeground(new Color(76, 86, 96));
-        panelFormulario.add(lblSeleccion, gbc);
-
-        gbc.gridy++;
         JButton btnSalida = new JButton("Registrar salida");
         btnSalida.setFont(new Font("Segoe UI", Font.BOLD, 14));
         btnSalida.setBackground(new Color(190, 109, 42));
@@ -195,6 +196,25 @@ public class VentanaPrincipal extends JFrame {
         btnSalida.setFocusPainted(false);
         btnSalida.addActionListener(e -> registrarSalida());
         panelFormulario.add(btnSalida, gbc);
+
+        gbc.gridy++;
+        JButton btnEliminarHistorial = new JButton("Eliminar historial");
+        btnEliminarHistorial.setFont(new Font("Segoe UI", Font.BOLD, 14));
+        btnEliminarHistorial.setBackground(new Color(165, 54, 54));
+        btnEliminarHistorial.setForeground(Color.WHITE);
+        btnEliminarHistorial.setFocusPainted(false);
+        btnEliminarHistorial.addActionListener(e -> eliminarRegistroHistorial());
+        panelFormulario.add(btnEliminarHistorial, gbc);
+
+        gbc.gridy++;
+        lblSeleccionActivo.setFont(new Font("Segoe UI", Font.PLAIN, 13));
+        lblSeleccionActivo.setForeground(new Color(76, 86, 96));
+        panelFormulario.add(lblSeleccionActivo, gbc);
+
+        gbc.gridy++;
+        lblSeleccionHistorial.setFont(new Font("Segoe UI", Font.PLAIN, 13));
+        lblSeleccionHistorial.setForeground(new Color(76, 86, 96));
+        panelFormulario.add(lblSeleccionHistorial, gbc);
 
         gbc.gridy++;
         lblMontoSalida.setFont(new Font("Segoe UI", Font.BOLD, 13));
@@ -215,11 +235,26 @@ public class VentanaPrincipal extends JFrame {
         panelTablas.setBackground(Color.WHITE);
         panelTablas.setBorder(BorderFactory.createCompoundBorder(
                 BorderFactory.createLineBorder(new Color(202, 213, 222)),
-                BorderFactory.createEmptyBorder(18, 18, 18, 18)
+                BorderFactory.createEmptyBorder(20, 20, 20, 20)
         ));
+
+        JPanel encabezado = new JPanel(new BorderLayout());
+        encabezado.setOpaque(false);
 
         JLabel lblTabla = new JLabel("Control de parqueo");
         lblTabla.setFont(new Font("Segoe UI", Font.BOLD, 18));
+
+        JPanel resumen = new JPanel(new GridLayout(1, 2, 12, 0));
+        resumen.setOpaque(false);
+        lblResumenActivos.setFont(new Font("Segoe UI", Font.BOLD, 13));
+        lblResumenActivos.setForeground(new Color(24, 63, 95));
+        lblResumenHistorial.setFont(new Font("Segoe UI", Font.BOLD, 13));
+        lblResumenHistorial.setForeground(new Color(112, 61, 16));
+        resumen.add(lblResumenActivos);
+        resumen.add(lblResumenHistorial);
+
+        encabezado.add(lblTabla, BorderLayout.WEST);
+        encabezado.add(resumen, BorderLayout.EAST);
 
         tblVehiculosActivos.setRowHeight(24);
         tblVehiculosActivos.getTableHeader().setReorderingAllowed(false);
@@ -236,28 +271,33 @@ public class VentanaPrincipal extends JFrame {
         tblHistorial.getTableHeader().setReorderingAllowed(false);
         tblHistorial.setFont(new Font("Segoe UI", Font.PLAIN, 13));
         tblHistorial.getTableHeader().setFont(new Font("Segoe UI", Font.BOLD, 13));
+        tblHistorial.addMouseListener(new MouseAdapter() {
+            @Override
+            public void mouseClicked(MouseEvent e) {
+                seleccionarRegistroHistorial();
+            }
+        });
 
-        JScrollPane scrollTabla = new JScrollPane(tblVehiculosActivos);
-        scrollTabla.setBorder(BorderFactory.createLineBorder(new Color(214, 223, 230)));
+        JScrollPane scrollActivos = new JScrollPane(tblVehiculosActivos);
+        scrollActivos.setBorder(BorderFactory.createLineBorder(new Color(214, 223, 230)));
 
         JScrollPane scrollHistorial = new JScrollPane(tblHistorial);
         scrollHistorial.setBorder(BorderFactory.createLineBorder(new Color(214, 223, 230)));
 
         JTabbedPane pestanas = new JTabbedPane();
         pestanas.setFont(new Font("Segoe UI", Font.BOLD, 13));
-        pestanas.addTab("Vehiculos activos", scrollTabla);
+        pestanas.addTab("Vehiculos activos", scrollActivos);
         pestanas.addTab("Historial", scrollHistorial);
 
-        panelTablas.add(lblTabla, BorderLayout.NORTH);
+        panelTablas.add(encabezado, BorderLayout.NORTH);
         panelTablas.add(pestanas, BorderLayout.CENTER);
-
         return panelTablas;
     }
 
     private JPanel construirPie() {
         JPanel panelPie = new JPanel(new FlowLayout(FlowLayout.LEFT));
         panelPie.setBackground(new Color(245, 248, 250));
-        panelPie.setBorder(BorderFactory.createEmptyBorder(4, 14, 10, 14));
+        panelPie.setBorder(BorderFactory.createEmptyBorder(6, 16, 12, 16));
 
         lblEstado.setHorizontalAlignment(SwingConstants.LEFT);
         lblEstado.setFont(new Font("Segoe UI", Font.PLAIN, 13));
@@ -302,7 +342,6 @@ public class VentanaPrincipal extends JFrame {
             lblMontoSalida.setText("Monto calculado en la ultima salida: " + formatearColones(registroSalida.getMontoPagado()));
             mostrarMensaje("Salida registrada para la placa " + registroSalida.getVehiculo().getPlaca()
                     + ". Monto a pagar: " + formatearColones(registroSalida.getMontoPagado()) + ".", true);
-            limpiarSeleccion();
             cargarDatos();
         } catch (IllegalArgumentException ex) {
             mostrarMensaje(ex.getMessage(), false);
@@ -311,8 +350,27 @@ public class VentanaPrincipal extends JFrame {
         }
     }
 
+    private void eliminarRegistroHistorial() {
+        if (parqueoService == null) {
+            mostrarMensaje("El servicio no se encuentra disponible.", false);
+            return;
+        }
+
+        try {
+            parqueoService.eliminarRegistroHistorial(idHistorialSeleccionado);
+            mostrarMensaje("El registro historico seleccionado fue eliminado correctamente.", true);
+            cargarDatos();
+        } catch (IllegalArgumentException ex) {
+            mostrarMensaje(ex.getMessage(), false);
+        } catch (IOException ex) {
+            mostrarMensaje("Ocurrio un problema al eliminar el registro historico.", false);
+        }
+    }
+
     private void cargarDatos() {
         limpiarTablas();
+        limpiarSeleccionActivo();
+        limpiarSeleccionHistorial();
 
         if (parqueoService == null) {
             return;
@@ -345,6 +403,9 @@ public class VentanaPrincipal extends JFrame {
                     registro.getEstado()
                 });
             }
+
+            lblResumenActivos.setText("Activos: " + registrosActivos.size());
+            lblResumenHistorial.setText("Historial: " + historial.size());
         } catch (IOException ex) {
             mostrarMensaje("No fue posible cargar la informacion del sistema.", false);
         }
@@ -368,15 +429,33 @@ public class VentanaPrincipal extends JFrame {
             idRegistroSeleccionado = Integer.parseInt(
                     modeloActivos.getValueAt(filaSeleccionada, 0).toString());
             String placa = modeloActivos.getValueAt(filaSeleccionada, 1).toString();
-            lblSeleccion.setText("Vehiculo seleccionado para salida: " + placa
+            lblSeleccionActivo.setText("Vehiculo activo seleccionado: " + placa
                     + " (ID " + idRegistroSeleccionado + ")");
         }
     }
 
-    private void limpiarSeleccion() {
+    private void seleccionarRegistroHistorial() {
+        int filaSeleccionada = tblHistorial.getSelectedRow();
+
+        if (filaSeleccionada >= 0) {
+            idHistorialSeleccionado = Integer.parseInt(
+                    modeloHistorial.getValueAt(filaSeleccionada, 0).toString());
+            String placa = modeloHistorial.getValueAt(filaSeleccionada, 1).toString();
+            lblSeleccionHistorial.setText("Registro historico seleccionado: " + placa
+                    + " (ID " + idHistorialSeleccionado + ")");
+        }
+    }
+
+    private void limpiarSeleccionActivo() {
         idRegistroSeleccionado = -1;
         tblVehiculosActivos.clearSelection();
-        lblSeleccion.setText("Vehiculo seleccionado para salida: ninguno");
+        lblSeleccionActivo.setText("Vehiculo activo seleccionado: ninguno");
+    }
+
+    private void limpiarSeleccionHistorial() {
+        idHistorialSeleccionado = -1;
+        tblHistorial.clearSelection();
+        lblSeleccionHistorial.setText("Registro historico seleccionado: ninguno");
     }
 
     private void mostrarMensaje(String mensaje, boolean exito) {
@@ -385,6 +464,6 @@ public class VentanaPrincipal extends JFrame {
     }
 
     private String formatearColones(double monto) {
-        return "₡" + String.format("%.0f", monto);
+        return "CRC " + String.format("%.0f", monto);
     }
 }

@@ -113,6 +113,27 @@ public class RegistroParqueoDAOImpl implements RegistroParqueoDAO {
     }
 
     @Override
+    public void eliminarRegistroHistorial(int idRegistro) throws IOException {
+        List<RegistroParqueo> registros = obtenerTodosLosRegistros();
+
+        for (int i = 0; i < registros.size(); i++) {
+            RegistroParqueo registro = registros.get(i);
+
+            if (registro.getIdRegistro() == idRegistro) {
+                if ("ACTIVO".equalsIgnoreCase(registro.getEstado())) {
+                    throw new IOException("No se puede eliminar un registro activo.");
+                }
+
+                registros.remove(i);
+                guardarTodosLosRegistros(registros);
+                return;
+            }
+        }
+
+        throw new IOException("No se encontro el registro historico a eliminar.");
+    }
+
+    @Override
     public int obtenerSiguienteId() throws IOException {
         List<RegistroParqueo> registros = obtenerTodosLosRegistros();
         int mayorId = 0;

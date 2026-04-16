@@ -22,6 +22,8 @@ public class ParqueoService {
     private static final String TIPO_CARRO = "Carro";
     private static final String TIPO_MOTO = "Moto";
     private static final int TARIFA_POR_HORA = 500;
+    private static final int LONGITUD_MINIMA_PLACA = 3;
+    private static final int LONGITUD_MAXIMA_PLACA = 10;
     private final RegistroParqueoDAO registroParqueoDAO;
     private final DateTimeFormatter formatoFecha;
     private final DateTimeFormatter formatoHora;
@@ -96,13 +98,29 @@ public class ParqueoService {
         return registro;
     }
 
+    public void eliminarRegistroHistorial(int idRegistro) throws IOException {
+        if (idRegistro <= 0) {
+            throw new IllegalArgumentException("Debe seleccionar un registro del historial.");
+        }
+
+        registroParqueoDAO.eliminarRegistroHistorial(idRegistro);
+    }
+
     private void validarDatos(String placa, String tipo) {
         if (placa.isEmpty()) {
             throw new IllegalArgumentException("La placa es obligatoria.");
         }
 
+        if (placa.length() < LONGITUD_MINIMA_PLACA || placa.length() > LONGITUD_MAXIMA_PLACA) {
+            throw new IllegalArgumentException("La placa debe tener entre 3 y 10 caracteres.");
+        }
+
         if (placa.contains(";")) {
             throw new IllegalArgumentException("La placa no puede contener el caracter ';'.");
+        }
+
+        if (placa.contains(" ")) {
+            throw new IllegalArgumentException("La placa no puede contener espacios.");
         }
 
         if (!placa.matches("[A-Z0-9-]+")) {

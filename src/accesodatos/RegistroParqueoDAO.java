@@ -20,5 +20,7 @@ public interface RegistroParqueoDAO {
 
     void actualizarRegistro(RegistroParqueo registroActualizado) throws IOException;
 
+    void eliminarRegistroHistorial(int idRegistro) throws IOException;
+
     int obtenerSiguienteId() throws IOException;
 }
