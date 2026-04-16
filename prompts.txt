@@ -1,4 +1,4 @@
-﻿Version v1.2 del sistema de parqueo publico.
+Version v1.3 del sistema de parqueo publico.
 
 Objetivo:
 Construir un proyecto academico en Java usando NetBeans + Apache Ant, con interfaz grafica Swing, arquitectura por capas y persistencia en archivos .txt.
@@ -6,15 +6,11 @@ Construir un proyecto academico en Java usando NetBeans + Apache Ant, con interf
 Alcance implementado:
 - Registro de ingreso de vehiculos.
 - Registro de salida de vehiculos.
-- Calculo automatico del monto a pagar.
+- Registro manual de minutos de permanencia para la salida.
+- Calculo del monto a pagar.
 - Historial de vehiculos atendidos.
 - Eliminacion de registros historicos.
 - Interfaz grafica mejor organizada.
-- Validacion de placa obligatoria.
-- Validacion de tipo de vehiculo obligatorio.
-- Prevencion de placas activas repetidas.
-- Tabla de vehiculos activos.
-- Tabla de historial.
 - Persistencia en archivo de texto.
 
 Restricciones respetadas:
@@ -23,12 +19,8 @@ Restricciones respetadas:
 - Toda la interaccion ocurre dentro de ventanas Swing.
 
 Refinamiento de la iteracion:
-- Se verifico compilacion con Apache Ant usando el ejecutable de NetBeans.
-- Se reforzaron las validaciones de negocio para placa y tipo de vehiculo.
-- Se aseguro que solo se acepten tipos validos: Carro y Moto.
-- Se agrego validacion para impedir caracteres conflictivos con el formato del archivo.
-- Se hizo mas robusta la persistencia en `data/registros_parqueo.txt`.
-- Se amplio el registro para almacenar fecha y hora de salida, minutos totales y monto pagado.
-- Se mantuvo todo calculo dentro de la capa logica.
-- Se agrego eliminacion de historial sin mezclar presentacion con acceso a datos.
-- Se reforzo la validacion de la placa con longitud y sin espacios.
+- Se mantiene la arquitectura por capas.
+- La salida ya no depende de la hora real del sistema para calcular el cobro.
+- El usuario indica manualmente los minutos de permanencia.
+- El sistema calcula el monto con tarifa de `CRC 500` por hora o fraccion.
+- El tiempo de permanencia queda guardado en el historial.

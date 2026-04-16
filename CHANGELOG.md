@@ -1,4 +1,4 @@
-﻿# CHANGELOG
+# CHANGELOG
 
 ## v1.0
 
@@ -30,3 +30,10 @@
 - La eliminacion del historial se procesa desde la capa logica y se persiste en el archivo `.txt`.
 - Se agregan resumenes visuales de registros activos e historicos.
 - Se corrige el formato mostrado para el monto calculado en la interfaz.
+
+## v1.3
+
+- Se modifica la salida del vehiculo para que el usuario indique manualmente los minutos de permanencia.
+- El monto se calcula con base en los minutos ingresados por el usuario.
+- Se conserva la tarifa de `CRC 500` por hora o fraccion.
+- El tiempo de permanencia se guarda en el historial del sistema.

@@ -31,6 +31,7 @@ import logica.ParqueoService;
 public class VentanaPrincipal extends JFrame {
 
     private final JTextField txtPlaca;
+    private final JTextField txtMinutosSalida;
     private final JComboBox<String> cmbTipoVehiculo;
     private final JLabel lblEstado;
     private final JLabel lblSeleccionActivo;
@@ -48,6 +49,7 @@ public class VentanaPrincipal extends JFrame {
 
     public VentanaPrincipal() {
         this.txtPlaca = new JTextField(16);
+        this.txtMinutosSalida = new JTextField(16);
         this.cmbTipoVehiculo = new JComboBox<>(new String[]{
             "Seleccione un tipo", "Carro", "Moto"
         });
@@ -112,7 +114,7 @@ public class VentanaPrincipal extends JFrame {
         lblTitulo.setFont(new Font("Segoe UI", Font.BOLD, 24));
         lblTitulo.setForeground(Color.WHITE);
 
-        JLabel lblSubtitulo = new JLabel("Version 1.2 - Interfaz mejorada, validaciones y gestion de historial");
+        JLabel lblSubtitulo = new JLabel("Version 1.3 - Salida con tiempo manual y calculo de cobro");
         lblSubtitulo.setFont(new Font("Segoe UI", Font.PLAIN, 14));
         lblSubtitulo.setForeground(new Color(214, 231, 242));
 
@@ -174,7 +176,7 @@ public class VentanaPrincipal extends JFrame {
         panelFormulario.add(cmbTipoVehiculo, gbc);
 
         gbc.gridy++;
-        JLabel lblAyuda = new JLabel("<html>La hora se registra automaticamente. Selecciona un vehiculo activo para procesar su salida o un registro historico para eliminarlo.</html>");
+        JLabel lblAyuda = new JLabel("<html>La entrada se registra automaticamente. Para la salida, selecciona un vehiculo e indica los minutos de permanencia.</html>");
         lblAyuda.setFont(new Font("Segoe UI", Font.PLAIN, 13));
         lblAyuda.setForeground(new Color(88, 103, 117));
         panelFormulario.add(lblAyuda, gbc);
@@ -187,6 +189,15 @@ public class VentanaPrincipal extends JFrame {
         btnRegistrar.setFocusPainted(false);
         btnRegistrar.addActionListener(e -> registrarIngreso());
         panelFormulario.add(btnRegistrar, gbc);
+
+        gbc.gridy++;
+        JLabel lblMinutosSalida = new JLabel("Minutos de permanencia");
+        lblMinutosSalida.setFont(new Font("Segoe UI", Font.PLAIN, 14));
+        panelFormulario.add(lblMinutosSalida, gbc);
+
+        gbc.gridy++;
+        txtMinutosSalida.setFont(new Font("Segoe UI", Font.PLAIN, 14));
+        panelFormulario.add(txtMinutosSalida, gbc);
 
         gbc.gridy++;
         JButton btnSalida = new JButton("Registrar salida");
@@ -338,11 +349,16 @@ public class VentanaPrincipal extends JFrame {
         }
 
         try {
-            RegistroParqueo registroSalida = parqueoService.registrarSalida(idRegistroSeleccionado);
-            lblMontoSalida.setText("Monto calculado en la ultima salida: " + formatearColones(registroSalida.getMontoPagado()));
+            int minutosPermanencia = Integer.parseInt(txtMinutosSalida.getText().trim());
+            RegistroParqueo registroSalida = parqueoService.registrarSalida(idRegistroSeleccionado, minutosPermanencia);
+            lblMontoSalida.setText("Tiempo: " + registroSalida.getMinutosTotales()
+                    + " minutos. Monto: " + formatearColones(registroSalida.getMontoPagado()));
             mostrarMensaje("Salida registrada para la placa " + registroSalida.getVehiculo().getPlaca()
                     + ". Monto a pagar: " + formatearColones(registroSalida.getMontoPagado()) + ".", true);
+            txtMinutosSalida.setText("");
             cargarDatos();
+        } catch (NumberFormatException ex) {
+            mostrarMensaje("Debe indicar los minutos de permanencia con un numero entero.", false);
         } catch (IllegalArgumentException ex) {
             mostrarMensaje(ex.getMessage(), false);
         } catch (IOException ex) {

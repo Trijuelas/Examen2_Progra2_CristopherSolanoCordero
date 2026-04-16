@@ -39,8 +39,7 @@ El sistema utiliza una arquitectura por capas para mantener una separacion clara
 
 - Registrar ingreso de vehiculos.
 - Registrar salida de vehiculos.
-- Generar hora de entrada automatica.
-- Generar hora de salida automatica.
+- Registrar manualmente los minutos de permanencia al momento de la salida.
 - Calcular monto a pagar con tarifa de `CRC 500` por hora o fraccion.
 - Mostrar tabla de vehiculos activos.
 - Mostrar tabla de historial de registros.
@@ -52,19 +51,14 @@ El sistema utiliza una arquitectura por capas para mantener una separacion clara
 
 ```text
 ExamenParqueo/
-├─ src/
-│  ├─ accesodatos/
-│  ├─ entidades/
-│  ├─ logica/
-│  └─ presentacion/
-├─ data/
-│  └─ registros_parqueo.txt
-├─ nbproject/
-├─ build.xml
-├─ manifest.mf
-├─ README.md
-├─ CHANGELOG.md
-└─ prompts.txt
+- src/
+- data/
+- nbproject/
+- build.xml
+- manifest.mf
+- README.md
+- CHANGELOG.md
+- prompts.txt
 ```
 
 ## 8. Como ejecutar el proyecto en NetBeans
@@ -86,8 +80,8 @@ ExamenParqueo/
 - El tipo de vehiculo es obligatorio.
 - Solo se permiten los tipos `Carro` y `Moto`.
 - Un vehiculo no puede registrar un nuevo ingreso si ya tiene un registro activo.
-- La hora de entrada se genera automaticamente.
-- La hora de salida se genera automaticamente.
+- La hora de entrada se registra automaticamente.
+- En la salida, el usuario indica manualmente los minutos de permanencia.
 - El cobro se calcula a `CRC 500` por hora o fraccion.
 - Si el tiempo es menor a una hora, se cobra una hora minima.
 - Los registros con salida procesada pasan a estado `FINALIZADO`.
@@ -98,6 +92,7 @@ ExamenParqueo/
 - `v1.0`: registro de ingresos, tabla de activos, persistencia en archivo `.txt` y arquitectura base por capas.
 - `v1.1`: registro de salida, calculo de cobro, historial de vehiculos y persistencia ampliada.
 - `v1.2`: mejora visual de la interfaz, validaciones mas estrictas y eliminacion de registros historicos.
+- `v1.3`: salida con tiempo manual en minutos y calculo de cobro segun el tiempo indicado.
 
 ## 11. Autor
 

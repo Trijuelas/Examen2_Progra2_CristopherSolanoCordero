@@ -8,7 +8,6 @@ import java.io.IOException;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.LocalTime;
-import java.time.Duration;
 import java.time.format.DateTimeFormatter;
 import java.time.format.DateTimeParseException;
 import java.util.ArrayList;
@@ -78,9 +77,13 @@ public class ParqueoService {
         return historial;
     }
 
-    public RegistroParqueo registrarSalida(int idRegistro) throws IOException {
+    public RegistroParqueo registrarSalida(int idRegistro, int minutosPermanencia) throws IOException {
         if (idRegistro <= 0) {
             throw new IllegalArgumentException("Debe seleccionar un vehiculo activo.");
+        }
+
+        if (minutosPermanencia <= 0) {
+            throw new IllegalArgumentException("Debe indicar los minutos de permanencia.");
         }
 
         RegistroParqueo registro = registroParqueoDAO.buscarRegistroActivoPorId(idRegistro);
@@ -89,12 +92,13 @@ public class ParqueoService {
             throw new IllegalArgumentException("El vehiculo seleccionado ya no se encuentra activo.");
         }
 
-        LocalDate fechaActual = LocalDate.now();
-        LocalTime horaActual = LocalTime.now();
+        LocalDateTime fechaHoraEntrada = convertirAFechaHora(
+                registro.getFechaEntrada(), registro.getHoraEntrada());
+        LocalDateTime fechaHoraSalida = fechaHoraEntrada.plusMinutes(minutosPermanencia);
 
-        registro.setFechaSalida(fechaActual.format(formatoFecha));
-        registro.setHoraSalida(horaActual.format(formatoHora));
-        registro.setMinutosTotales(calcularMinutosTotales(registro));
+        registro.setFechaSalida(fechaHoraSalida.toLocalDate().format(formatoFecha));
+        registro.setHoraSalida(fechaHoraSalida.toLocalTime().format(formatoHora));
+        registro.setMinutosTotales(minutosPermanencia);
         registro.setMontoPagado(calcularMonto(registro.getMinutosTotales()));
         registro.setEstado(ESTADO_FINALIZADO);
 
@@ -164,24 +168,6 @@ public class ParqueoService {
         }
 
         return tipo.trim();
-    }
-
-    private int calcularMinutosTotales(RegistroParqueo registro) {
-        try {
-            LocalDateTime fechaHoraEntrada = convertirAFechaHora(
-                    registro.getFechaEntrada(), registro.getHoraEntrada());
-            LocalDateTime fechaHoraSalida = convertirAFechaHora(
-                    registro.getFechaSalida(), registro.getHoraSalida());
-
-            long minutos = Duration.between(fechaHoraEntrada, fechaHoraSalida).toMinutes();
-            if (minutos <= 0) {
-                return 1;
-            }
-
-            return (int) minutos;
-        } catch (DateTimeParseException ex) {
-            throw new IllegalArgumentException("No fue posible calcular el tiempo del registro.");
-        }
     }
 
     private LocalDateTime convertirAFechaHora(String fecha, String hora) {
