@@ -1,9 +1,9 @@
 Version v1.3 del sistema de parqueo publico.
 
-Objetivo:
+Objetivo general del proyecto:
 Construir un proyecto academico en Java usando NetBeans + Apache Ant, con interfaz grafica Swing, arquitectura por capas y persistencia en archivos .txt.
 
-Alcance implementado:
+Alcance implementado en la version actual:
 - Registro de ingreso de vehiculos.
 - Registro de salida de vehiculos.
 - Registro manual de minutos de permanencia para la salida.
@@ -13,14 +13,92 @@ Alcance implementado:
 - Interfaz grafica mejor organizada.
 - Persistencia en archivo de texto.
 
-Restricciones respetadas:
+Restricciones respetadas durante el desarrollo:
 - No se usa consola.
 - No se usa JOptionPane.
 - Toda la interaccion ocurre dentro de ventanas Swing.
+- Se mantiene arquitectura por capas.
+- El proyecto se mantiene sencillo, academico y entendible.
 
-Refinamiento de la iteracion:
-- Se mantiene la arquitectura por capas.
-- La salida ya no depende de la hora real del sistema para calcular el cobro.
-- El usuario indica manualmente los minutos de permanencia.
-- El sistema calcula el monto con tarifa de `CRC 500` por hora o fraccion.
-- El tiempo de permanencia queda guardado en el historial.
+Resumen de prompts solicitados por el usuario:
+
+1. Diseno inicial del sistema
+- Se solicito primero una propuesta tecnica antes de generar codigo.
+- Se definio arquitectura por capas.
+- Se definieron clases por paquete.
+- Se definieron responsabilidades por clase.
+- Se definieron archivos `.txt` para persistencia.
+- Se definieron ventanas Swing y flujo general del sistema.
+
+2. Modelo y reglas de negocio
+- Se pidio definir entidades necesarias.
+- Se pidieron atributos exactos de cada entidad.
+- Se pidieron validaciones del sistema.
+- Se pidio la regla de unicidad de ingreso.
+- Se pidio el calculo de cobro con tarifa de `CRC 500` por hora o fraccion.
+- Se pidio distinguir registros activos de registros historicos.
+- Se pidio el formato de persistencia en archivos `.txt`.
+
+3. Construccion de v1.0
+- Se solicito una primera version funcional.
+- Se implemento registro de ingreso.
+- Se implemento interfaz Swing funcional.
+- Se implemento persistencia en `.txt`.
+- Se mantuvo separacion estricta de capas.
+- Se agregaron README, CHANGELOG y prompts.
+
+4. Revision y refinamiento de v1.0
+- Se pidio verificar compilacion, capas, validaciones y persistencia.
+- Se reforzaron validaciones de placa y tipo.
+- Se confirmo que no se usara consola ni JOptionPane.
+
+5. Construccion de v1.1
+- Se solicito agregar salida del vehiculo.
+- Se agrego hora de salida automatica.
+- Se agrego calculo del monto.
+- Se agrego historial de vehiculos.
+- Se mantuvo la logica de negocio separada de la interfaz.
+
+6. Publicacion continua en GitHub
+- Se pidio ir subiendo codigo, commits, versiones, tags y documentacion.
+- Se inicializo Git en el proyecto.
+- Se crearon commits y tags `v1.0`, `v1.1`, `v1.2` y `v1.3`.
+- Se actualizo el repositorio remoto en GitHub.
+
+7. Revision puntual de la logica de cobro
+- Se pidio verificar la regla de `CRC 500` por hora o fraccion.
+- Se reviso que menos de una hora cobrara una hora minima.
+- Se corrigio el uso de la hora real con mayor precision cuando fue necesario.
+
+8. Construccion de v1.2
+- Se pidio mejorar la interfaz grafica.
+- Se pidio mejorar validaciones.
+- Se pidio permitir eliminar registros historicos.
+- Se mantuvo la arquitectura sin rehacer el proyecto.
+
+9. README academico
+- Se pidio redactar un README claro, formal y bien estructurado.
+- Se incluyeron descripcion, objetivo, tecnologias, arquitectura, funcionalidades, reglas de negocio, versiones y autor.
+
+10. Simplificacion del estilo de codigo
+- Se pidio que el codigo se viera mas simple, normal y academico.
+- Se simplifico especificamente el archivo `Main.java` en la capa de presentacion.
+- Se evito el uso de lambda y estructuras innecesarias en ese archivo.
+
+11. Correccion puntual del tiempo de salida
+- Se pidio corregir que todos los vehiculos salian con una hora y `CRC 500`.
+- Se corrigio la logica para calcular mejor el tiempo real entre entrada y salida.
+
+12. Ajuste final para salida con tiempo manual
+- Se pidio que la salida no usara la hora real del sistema.
+- Se cambio el flujo para que el usuario indique manualmente el tiempo de permanencia.
+- Se eligio manejarlo en minutos por ser la opcion mas simple y academica.
+- El sistema calcula el cobro con base en esos minutos y guarda el tiempo en el historial.
+
+Estado final del proyecto:
+- Version actual: `v1.3`
+- Arquitectura por capas conservada.
+- Interfaz Swing funcional.
+- Persistencia en archivos `.txt`.
+- Historial y eliminacion de registros disponibles.
+- Salida con tiempo manual en minutos y cobro por hora o fraccion.
