@@ -28,12 +28,16 @@ public class ParqueoService {
     private final DateTimeFormatter formatoFecha;
     private final DateTimeFormatter formatoHora;
     private final DateTimeFormatter formatoFechaHora;
+    private final DateTimeFormatter formatoHoraSinSegundos;
+    private final DateTimeFormatter formatoFechaHoraSinSegundos;
 
     public ParqueoService() throws IOException {
         this.registroParqueoDAO = new RegistroParqueoDAOImpl();
         this.formatoFecha = DateTimeFormatter.ofPattern("yyyy-MM-dd");
-        this.formatoHora = DateTimeFormatter.ofPattern("HH:mm");
-        this.formatoFechaHora = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm");
+        this.formatoHora = DateTimeFormatter.ofPattern("HH:mm:ss");
+        this.formatoFechaHora = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss");
+        this.formatoHoraSinSegundos = DateTimeFormatter.ofPattern("HH:mm");
+        this.formatoFechaHoraSinSegundos = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm");
     }
 
     public void registrarIngreso(String placa, String tipo) throws IOException {
@@ -164,10 +168,10 @@ public class ParqueoService {
 
     private int calcularMinutosTotales(RegistroParqueo registro) {
         try {
-            LocalDateTime fechaHoraEntrada = LocalDateTime.parse(
-                    registro.getFechaEntrada() + " " + registro.getHoraEntrada(), formatoFechaHora);
-            LocalDateTime fechaHoraSalida = LocalDateTime.parse(
-                    registro.getFechaSalida() + " " + registro.getHoraSalida(), formatoFechaHora);
+            LocalDateTime fechaHoraEntrada = convertirAFechaHora(
+                    registro.getFechaEntrada(), registro.getHoraEntrada());
+            LocalDateTime fechaHoraSalida = convertirAFechaHora(
+                    registro.getFechaSalida(), registro.getHoraSalida());
 
             long minutos = Duration.between(fechaHoraEntrada, fechaHoraSalida).toMinutes();
             if (minutos <= 0) {
@@ -177,6 +181,16 @@ public class ParqueoService {
             return (int) minutos;
         } catch (DateTimeParseException ex) {
             throw new IllegalArgumentException("No fue posible calcular el tiempo del registro.");
+        }
+    }
+
+    private LocalDateTime convertirAFechaHora(String fecha, String hora) {
+        String fechaHoraTexto = fecha + " " + hora;
+
+        try {
+            return LocalDateTime.parse(fechaHoraTexto, formatoFechaHora);
+        } catch (DateTimeParseException ex) {
+            return LocalDateTime.parse(fechaHoraTexto, formatoFechaHoraSinSegundos);
         }
     }
 
