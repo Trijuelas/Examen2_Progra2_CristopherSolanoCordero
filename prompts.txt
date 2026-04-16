@@ -1,0 +1,24 @@
+Version v1.0 del sistema de parqueo publico.
+
+Objetivo:
+Construir un proyecto academico en Java usando NetBeans + Apache Ant, con interfaz grafica Swing, arquitectura por capas y persistencia en archivos .txt.
+
+Alcance implementado:
+- Registro de ingreso de vehiculos.
+- Validacion de placa obligatoria.
+- Validacion de tipo de vehiculo obligatorio.
+- Prevencion de placas activas repetidas.
+- Tabla de vehiculos activos.
+- Persistencia en archivo de texto.
+
+Restricciones respetadas:
+- No se usa consola.
+- No se usa JOptionPane.
+- Toda la interaccion ocurre dentro de ventanas Swing.
+
+Refinamiento de la iteracion:
+- Se verifico compilacion con Apache Ant usando el ejecutable de NetBeans.
+- Se reforzaron las validaciones de negocio para placa y tipo de vehiculo.
+- Se aseguro que solo se acepten tipos validos: Carro y Moto.
+- Se agrego validacion para impedir caracteres conflictivos con el formato del archivo.
+- Se hizo mas robusta la persistencia en `data/registros_parqueo.txt`.

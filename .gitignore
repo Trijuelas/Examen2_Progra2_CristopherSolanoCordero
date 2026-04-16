@@ -1,0 +1,4 @@
+build/
+dist/
+.codex_backup_v11/
+nbproject/private/

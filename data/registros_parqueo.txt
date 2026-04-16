@@ -1,0 +1,1 @@
+idRegistro;placa;tipo;fechaEntrada;horaEntrada;estado
