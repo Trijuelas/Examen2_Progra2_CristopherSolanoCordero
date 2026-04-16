@@ -1,1 +1,1 @@
-idRegistro;placa;tipo;fechaEntrada;horaEntrada;estado
+idRegistro;placa;tipo;fechaEntrada;horaEntrada;fechaSalida;horaSalida;minutosTotales;montoPagado;estado

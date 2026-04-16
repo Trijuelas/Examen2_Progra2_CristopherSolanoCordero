@@ -13,7 +13,7 @@ import java.util.List;
 
 public class RegistroParqueoDAOImpl implements RegistroParqueoDAO {
 
-    private static final String ENCABEZADO = "idRegistro;placa;tipo;fechaEntrada;horaEntrada;estado";
+    private static final String ENCABEZADO = "idRegistro;placa;tipo;fechaEntrada;horaEntrada;fechaSalida;horaSalida;minutosTotales;montoPagado;estado";
 
     public RegistroParqueoDAOImpl() throws IOException {
         asegurarArchivoExiste();
@@ -39,6 +39,20 @@ public class RegistroParqueoDAOImpl implements RegistroParqueoDAO {
         }
 
         return registrosActivos;
+    }
+
+    @Override
+    public List<RegistroParqueo> obtenerRegistrosHistorial() throws IOException {
+        List<RegistroParqueo> historial = new ArrayList<>();
+        List<RegistroParqueo> todosLosRegistros = obtenerTodosLosRegistros();
+
+        for (RegistroParqueo registro : todosLosRegistros) {
+            if (!"ACTIVO".equalsIgnoreCase(registro.getEstado())) {
+                historial.add(registro);
+            }
+        }
+
+        return historial;
     }
 
     @Override
@@ -68,6 +82,34 @@ public class RegistroParqueoDAOImpl implements RegistroParqueoDAO {
         }
 
         return false;
+    }
+
+    @Override
+    public RegistroParqueo buscarRegistroActivoPorId(int idRegistro) throws IOException {
+        List<RegistroParqueo> registrosActivos = obtenerRegistrosActivos();
+
+        for (RegistroParqueo registro : registrosActivos) {
+            if (registro.getIdRegistro() == idRegistro) {
+                return registro;
+            }
+        }
+
+        return null;
+    }
+
+    @Override
+    public void actualizarRegistro(RegistroParqueo registroActualizado) throws IOException {
+        List<RegistroParqueo> registros = obtenerTodosLosRegistros();
+
+        for (int i = 0; i < registros.size(); i++) {
+            if (registros.get(i).getIdRegistro() == registroActualizado.getIdRegistro()) {
+                registros.set(i, registroActualizado);
+                guardarTodosLosRegistros(registros);
+                return;
+            }
+        }
+
+        throw new IOException("No se encontro el registro a actualizar.");
     }
 
     @Override
@@ -108,13 +150,17 @@ public class RegistroParqueoDAOImpl implements RegistroParqueoDAO {
                 + registro.getVehiculo().getTipo() + ";"
                 + registro.getFechaEntrada() + ";"
                 + registro.getHoraEntrada() + ";"
+                + valorTexto(registro.getFechaSalida()) + ";"
+                + valorTexto(registro.getHoraSalida()) + ";"
+                + registro.getMinutosTotales() + ";"
+                + registro.getMontoPagado() + ";"
                 + registro.getEstado();
     }
 
     private RegistroParqueo convertirLineaARegistro(String linea) throws IOException {
         String[] datos = linea.split(";", -1);
 
-        if (datos.length != 6) {
+        if (datos.length != 6 && datos.length != 10) {
             throw new IOException("El archivo de registros contiene una linea invalida: " + linea);
         }
 
@@ -123,9 +169,40 @@ public class RegistroParqueoDAOImpl implements RegistroParqueoDAO {
         String tipo = datos[2];
         String fechaEntrada = datos[3];
         String horaEntrada = datos[4];
-        String estado = datos[5];
+        String fechaSalida = "";
+        String horaSalida = "";
+        int minutosTotales = 0;
+        double montoPagado = 0;
+        String estado;
+
+        if (datos.length == 6) {
+            estado = datos[5];
+        } else {
+            fechaSalida = datos[5];
+            horaSalida = datos[6];
+            minutosTotales = Integer.parseInt(datos[7]);
+            montoPagado = Double.parseDouble(datos[8]);
+            estado = datos[9];
+        }
 
         Vehiculo vehiculo = new Vehiculo(placa, tipo);
-        return new RegistroParqueo(idRegistro, vehiculo, fechaEntrada, horaEntrada, estado);
+        return new RegistroParqueo(idRegistro, vehiculo, fechaEntrada, horaEntrada,
+                fechaSalida, horaSalida, minutosTotales, montoPagado, estado);
+    }
+
+    private void guardarTodosLosRegistros(List<RegistroParqueo> registros) throws IOException {
+        StringBuilder contenido = new StringBuilder();
+        contenido.append(ENCABEZADO).append(System.lineSeparator());
+
+        for (RegistroParqueo registro : registros) {
+            contenido.append(convertirRegistroALinea(registro)).append(System.lineSeparator());
+        }
+
+        Files.writeString(obtenerRutaArchivo(), contenido.toString(), StandardCharsets.UTF_8,
+                StandardOpenOption.CREATE, StandardOpenOption.TRUNCATE_EXISTING);
+    }
+
+    private String valorTexto(String valor) {
+        return valor == null ? "" : valor;
     }
 }

@@ -11,3 +11,13 @@
 - Se aplica la regla de unicidad para impedir ingresos repetidos de una placa activa.
 - Se agrega persistencia en `data/registros_parqueo.txt`.
 - La hora de entrada se registra automaticamente.
+
+## v1.1
+
+- Se implementa el registro de salida de vehiculos desde la interfaz.
+- La salida toma la fecha y hora automaticamente.
+- Se calcula el monto a pagar con una tarifa de `₡500` por hora o fraccion.
+- Se agregan dos tablas: una para vehiculos activos y otra para historial.
+- Los registros salen del estado `ACTIVO` y pasan a `FINALIZADO`.
+- Se amplia el archivo `data/registros_parqueo.txt` para guardar salida, minutos y monto pagado.
+- La informacion se recarga desde archivos al abrir el sistema.

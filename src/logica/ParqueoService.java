@@ -6,23 +6,32 @@ import entidades.RegistroParqueo;
 import entidades.Vehiculo;
 import java.io.IOException;
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.time.LocalTime;
+import java.time.Duration;
 import java.time.format.DateTimeFormatter;
+import java.time.format.DateTimeParseException;
+import java.util.ArrayList;
+import java.util.Comparator;
 import java.util.List;
 
 public class ParqueoService {
 
     private static final String ESTADO_ACTIVO = "ACTIVO";
+    private static final String ESTADO_FINALIZADO = "FINALIZADO";
     private static final String TIPO_CARRO = "Carro";
     private static final String TIPO_MOTO = "Moto";
+    private static final int TARIFA_POR_HORA = 500;
     private final RegistroParqueoDAO registroParqueoDAO;
     private final DateTimeFormatter formatoFecha;
     private final DateTimeFormatter formatoHora;
+    private final DateTimeFormatter formatoFechaHora;
 
     public ParqueoService() throws IOException {
         this.registroParqueoDAO = new RegistroParqueoDAOImpl();
         this.formatoFecha = DateTimeFormatter.ofPattern("yyyy-MM-dd");
         this.formatoHora = DateTimeFormatter.ofPattern("HH:mm");
+        this.formatoFechaHora = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm");
     }
 
     public void registrarIngreso(String placa, String tipo) throws IOException {
@@ -41,6 +50,10 @@ public class ParqueoService {
                 vehiculo,
                 LocalDate.now().format(formatoFecha),
                 LocalTime.now().format(formatoHora),
+                "",
+                "",
+                0,
+                0,
                 ESTADO_ACTIVO
         );
 
@@ -48,7 +61,39 @@ public class ParqueoService {
     }
 
     public List<RegistroParqueo> obtenerRegistrosActivos() throws IOException {
-        return registroParqueoDAO.obtenerRegistrosActivos();
+        List<RegistroParqueo> registrosActivos = new ArrayList<>(registroParqueoDAO.obtenerRegistrosActivos());
+        registrosActivos.sort(Comparator.comparingInt(RegistroParqueo::getIdRegistro));
+        return registrosActivos;
+    }
+
+    public List<RegistroParqueo> obtenerRegistrosHistorial() throws IOException {
+        List<RegistroParqueo> historial = new ArrayList<>(registroParqueoDAO.obtenerRegistrosHistorial());
+        historial.sort(Comparator.comparingInt(RegistroParqueo::getIdRegistro).reversed());
+        return historial;
+    }
+
+    public RegistroParqueo registrarSalida(int idRegistro) throws IOException {
+        if (idRegistro <= 0) {
+            throw new IllegalArgumentException("Debe seleccionar un vehiculo activo.");
+        }
+
+        RegistroParqueo registro = registroParqueoDAO.buscarRegistroActivoPorId(idRegistro);
+
+        if (registro == null) {
+            throw new IllegalArgumentException("El vehiculo seleccionado ya no se encuentra activo.");
+        }
+
+        LocalDate fechaActual = LocalDate.now();
+        LocalTime horaActual = LocalTime.now();
+
+        registro.setFechaSalida(fechaActual.format(formatoFecha));
+        registro.setHoraSalida(horaActual.format(formatoHora));
+        registro.setMinutosTotales(calcularMinutosTotales(registro));
+        registro.setMontoPagado(calcularMonto(registro.getMinutosTotales()));
+        registro.setEstado(ESTADO_FINALIZADO);
+
+        registroParqueoDAO.actualizarRegistro(registro);
+        return registro;
     }
 
     private void validarDatos(String placa, String tipo) {
@@ -97,5 +142,37 @@ public class ParqueoService {
         }
 
         return tipo.trim();
+    }
+
+    private int calcularMinutosTotales(RegistroParqueo registro) {
+        try {
+            LocalDateTime fechaHoraEntrada = LocalDateTime.parse(
+                    registro.getFechaEntrada() + " " + registro.getHoraEntrada(), formatoFechaHora);
+            LocalDateTime fechaHoraSalida = LocalDateTime.parse(
+                    registro.getFechaSalida() + " " + registro.getHoraSalida(), formatoFechaHora);
+
+            long minutos = Duration.between(fechaHoraEntrada, fechaHoraSalida).toMinutes();
+            if (minutos <= 0) {
+                return 1;
+            }
+
+            return (int) minutos;
+        } catch (DateTimeParseException ex) {
+            throw new IllegalArgumentException("No fue posible calcular el tiempo del registro.");
+        }
+    }
+
+    private double calcularMonto(int minutosTotales) {
+        int horasCobradas = minutosTotales / 60;
+
+        if (minutosTotales % 60 != 0) {
+            horasCobradas++;
+        }
+
+        if (horasCobradas == 0) {
+            horasCobradas = 1;
+        }
+
+        return horasCobradas * TARIFA_POR_HORA;
     }
 }

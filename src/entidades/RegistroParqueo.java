@@ -6,17 +6,26 @@ public class RegistroParqueo {
     private Vehiculo vehiculo;
     private String fechaEntrada;
     private String horaEntrada;
+    private String fechaSalida;
+    private String horaSalida;
+    private int minutosTotales;
+    private double montoPagado;
     private String estado;
 
     public RegistroParqueo() {
     }
 
     public RegistroParqueo(int idRegistro, Vehiculo vehiculo, String fechaEntrada,
-            String horaEntrada, String estado) {
+            String horaEntrada, String fechaSalida, String horaSalida,
+            int minutosTotales, double montoPagado, String estado) {
         this.idRegistro = idRegistro;
         this.vehiculo = vehiculo;
         this.fechaEntrada = fechaEntrada;
         this.horaEntrada = horaEntrada;
+        this.fechaSalida = fechaSalida;
+        this.horaSalida = horaSalida;
+        this.minutosTotales = minutosTotales;
+        this.montoPagado = montoPagado;
         this.estado = estado;
     }
 
@@ -50,6 +59,38 @@ public class RegistroParqueo {
 
     public void setHoraEntrada(String horaEntrada) {
         this.horaEntrada = horaEntrada;
+    }
+
+    public String getFechaSalida() {
+        return fechaSalida;
+    }
+
+    public void setFechaSalida(String fechaSalida) {
+        this.fechaSalida = fechaSalida;
+    }
+
+    public String getHoraSalida() {
+        return horaSalida;
+    }
+
+    public void setHoraSalida(String horaSalida) {
+        this.horaSalida = horaSalida;
+    }
+
+    public int getMinutosTotales() {
+        return minutosTotales;
+    }
+
+    public void setMinutosTotales(int minutosTotales) {
+        this.minutosTotales = minutosTotales;
+    }
+
+    public double getMontoPagado() {
+        return montoPagado;
+    }
+
+    public void setMontoPagado(double montoPagado) {
+        this.montoPagado = montoPagado;
     }
 
     public String getEstado() {

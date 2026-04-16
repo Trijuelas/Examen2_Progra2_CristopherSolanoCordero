@@ -9,6 +9,8 @@ import java.awt.Font;
 import java.awt.GridBagConstraints;
 import java.awt.GridBagLayout;
 import java.awt.Insets;
+import java.awt.event.MouseAdapter;
+import java.awt.event.MouseEvent;
 import java.io.IOException;
 import java.util.List;
 import javax.swing.BorderFactory;
@@ -16,6 +18,7 @@ import javax.swing.JButton;
 import javax.swing.JComboBox;
 import javax.swing.JFrame;
 import javax.swing.JLabel;
+import javax.swing.JTabbedPane;
 import javax.swing.JPanel;
 import javax.swing.JScrollPane;
 import javax.swing.JTable;
@@ -30,27 +33,43 @@ public class VentanaPrincipal extends JFrame {
     private final JComboBox<String> cmbTipoVehiculo;
     private final JLabel lblEstado;
     private final JTable tblVehiculosActivos;
-    private final DefaultTableModel modeloTabla;
+    private final JTable tblHistorial;
+    private final DefaultTableModel modeloActivos;
+    private final DefaultTableModel modeloHistorial;
+    private final JLabel lblSeleccion;
+    private final JLabel lblMontoSalida;
     private ParqueoService parqueoService;
+    private int idRegistroSeleccionado;
 
     public VentanaPrincipal() {
         this.txtPlaca = new JTextField(16);
         this.cmbTipoVehiculo = new JComboBox<>(new String[]{
             "Seleccione un tipo", "Carro", "Moto"
         });
-        this.lblEstado = new JLabel("Sistema listo para registrar ingresos.");
-        this.modeloTabla = new DefaultTableModel(
+        this.lblEstado = new JLabel("Sistema listo para registrar ingresos y salidas.");
+        this.lblSeleccion = new JLabel("Vehiculo seleccionado para salida: ninguno");
+        this.lblMontoSalida = new JLabel("Monto calculado en la ultima salida: no disponible");
+        this.modeloActivos = new DefaultTableModel(
                 new Object[]{"ID", "Placa", "Tipo", "Fecha", "Hora", "Estado"}, 0) {
             @Override
             public boolean isCellEditable(int row, int column) {
                 return false;
             }
         };
-        this.tblVehiculosActivos = new JTable(modeloTabla);
+        this.modeloHistorial = new DefaultTableModel(
+                new Object[]{"ID", "Placa", "Tipo", "Entrada", "Salida", "Minutos", "Monto", "Estado"}, 0) {
+            @Override
+            public boolean isCellEditable(int row, int column) {
+                return false;
+            }
+        };
+        this.tblVehiculosActivos = new JTable(modeloActivos);
+        this.tblHistorial = new JTable(modeloHistorial);
+        this.idRegistroSeleccionado = -1;
 
         inicializarServicio();
         inicializarVentana();
-        cargarRegistrosActivos();
+        cargarDatos();
     }
 
     private void inicializarServicio() {
@@ -85,6 +104,7 @@ public class VentanaPrincipal extends JFrame {
         lblTitulo.setForeground(Color.WHITE);
 
         JLabel lblSubtitulo = new JLabel("Version 1.0 - Registro de ingreso de vehiculos");
+        lblSubtitulo.setText("Version 1.1 - Ingreso, salida e historial de vehiculos");
         lblSubtitulo.setFont(new Font("Segoe UI", Font.PLAIN, 14));
         lblSubtitulo.setForeground(new Color(214, 231, 242));
 
@@ -103,7 +123,7 @@ public class VentanaPrincipal extends JFrame {
         panelCentral.setBorder(BorderFactory.createEmptyBorder(0, 14, 0, 14));
 
         panelCentral.add(construirPanelFormulario(), BorderLayout.WEST);
-        panelCentral.add(construirPanelTabla(), BorderLayout.CENTER);
+        panelCentral.add(construirPanelTablas(), BorderLayout.CENTER);
 
         return panelCentral;
     }
@@ -115,7 +135,7 @@ public class VentanaPrincipal extends JFrame {
                 BorderFactory.createLineBorder(new Color(202, 213, 222)),
                 BorderFactory.createEmptyBorder(18, 18, 18, 18)
         ));
-        panelFormulario.setPreferredSize(new Dimension(300, 380));
+        panelFormulario.setPreferredSize(new Dimension(320, 420));
 
         GridBagConstraints gbc = new GridBagConstraints();
         gbc.gridx = 0;
@@ -162,6 +182,26 @@ public class VentanaPrincipal extends JFrame {
         btnRegistrar.addActionListener(e -> registrarIngreso());
         panelFormulario.add(btnRegistrar, gbc);
 
+        gbc.gridy++;
+        lblSeleccion.setFont(new Font("Segoe UI", Font.PLAIN, 13));
+        lblSeleccion.setForeground(new Color(76, 86, 96));
+        panelFormulario.add(lblSeleccion, gbc);
+
+        gbc.gridy++;
+        JButton btnSalida = new JButton("Registrar salida");
+        btnSalida.setFont(new Font("Segoe UI", Font.BOLD, 14));
+        btnSalida.setBackground(new Color(190, 109, 42));
+        btnSalida.setForeground(Color.WHITE);
+        btnSalida.setFocusPainted(false);
+        btnSalida.addActionListener(e -> registrarSalida());
+        panelFormulario.add(btnSalida, gbc);
+
+        gbc.gridy++;
+        lblMontoSalida.setFont(new Font("Segoe UI", Font.BOLD, 13));
+        lblMontoSalida.setForeground(new Color(95, 60, 20));
+        panelFormulario.add(lblMontoSalida, gbc);
+
+        gbc.gridy++;
         gbc.weighty = 1.0;
         JPanel espacio = new JPanel();
         espacio.setOpaque(false);
@@ -170,29 +210,48 @@ public class VentanaPrincipal extends JFrame {
         return panelFormulario;
     }
 
-    private JPanel construirPanelTabla() {
-        JPanel panelTabla = new JPanel(new BorderLayout(10, 10));
-        panelTabla.setBackground(Color.WHITE);
-        panelTabla.setBorder(BorderFactory.createCompoundBorder(
+    private JPanel construirPanelTablas() {
+        JPanel panelTablas = new JPanel(new BorderLayout(10, 10));
+        panelTablas.setBackground(Color.WHITE);
+        panelTablas.setBorder(BorderFactory.createCompoundBorder(
                 BorderFactory.createLineBorder(new Color(202, 213, 222)),
                 BorderFactory.createEmptyBorder(18, 18, 18, 18)
         ));
 
-        JLabel lblTabla = new JLabel("Vehiculos actualmente dentro del parqueo");
+        JLabel lblTabla = new JLabel("Control de parqueo");
         lblTabla.setFont(new Font("Segoe UI", Font.BOLD, 18));
 
         tblVehiculosActivos.setRowHeight(24);
         tblVehiculosActivos.getTableHeader().setReorderingAllowed(false);
         tblVehiculosActivos.setFont(new Font("Segoe UI", Font.PLAIN, 13));
         tblVehiculosActivos.getTableHeader().setFont(new Font("Segoe UI", Font.BOLD, 13));
+        tblVehiculosActivos.addMouseListener(new MouseAdapter() {
+            @Override
+            public void mouseClicked(MouseEvent e) {
+                seleccionarVehiculoActivo();
+            }
+        });
+
+        tblHistorial.setRowHeight(24);
+        tblHistorial.getTableHeader().setReorderingAllowed(false);
+        tblHistorial.setFont(new Font("Segoe UI", Font.PLAIN, 13));
+        tblHistorial.getTableHeader().setFont(new Font("Segoe UI", Font.BOLD, 13));
 
         JScrollPane scrollTabla = new JScrollPane(tblVehiculosActivos);
         scrollTabla.setBorder(BorderFactory.createLineBorder(new Color(214, 223, 230)));
 
-        panelTabla.add(lblTabla, BorderLayout.NORTH);
-        panelTabla.add(scrollTabla, BorderLayout.CENTER);
+        JScrollPane scrollHistorial = new JScrollPane(tblHistorial);
+        scrollHistorial.setBorder(BorderFactory.createLineBorder(new Color(214, 223, 230)));
 
-        return panelTabla;
+        JTabbedPane pestanas = new JTabbedPane();
+        pestanas.setFont(new Font("Segoe UI", Font.BOLD, 13));
+        pestanas.addTab("Vehiculos activos", scrollTabla);
+        pestanas.addTab("Historial", scrollHistorial);
+
+        panelTablas.add(lblTabla, BorderLayout.NORTH);
+        panelTablas.add(pestanas, BorderLayout.CENTER);
+
+        return panelTablas;
     }
 
     private JPanel construirPie() {
@@ -224,7 +283,7 @@ public class VentanaPrincipal extends JFrame {
             mostrarMensaje("Ingreso registrado correctamente para la placa "
                     + placa.trim().toUpperCase() + ".", true);
             limpiarFormulario();
-            cargarRegistrosActivos();
+            cargarDatos();
         } catch (IllegalArgumentException ex) {
             mostrarMensaje(ex.getMessage(), false);
         } catch (IOException ex) {
@@ -232,8 +291,28 @@ public class VentanaPrincipal extends JFrame {
         }
     }
 
-    private void cargarRegistrosActivos() {
-        limpiarTabla();
+    private void registrarSalida() {
+        if (parqueoService == null) {
+            mostrarMensaje("El servicio no se encuentra disponible.", false);
+            return;
+        }
+
+        try {
+            RegistroParqueo registroSalida = parqueoService.registrarSalida(idRegistroSeleccionado);
+            lblMontoSalida.setText("Monto calculado en la ultima salida: " + formatearColones(registroSalida.getMontoPagado()));
+            mostrarMensaje("Salida registrada para la placa " + registroSalida.getVehiculo().getPlaca()
+                    + ". Monto a pagar: " + formatearColones(registroSalida.getMontoPagado()) + ".", true);
+            limpiarSeleccion();
+            cargarDatos();
+        } catch (IllegalArgumentException ex) {
+            mostrarMensaje(ex.getMessage(), false);
+        } catch (IOException ex) {
+            mostrarMensaje("Ocurrio un problema al procesar la salida.", false);
+        }
+    }
+
+    private void cargarDatos() {
+        limpiarTablas();
 
         if (parqueoService == null) {
             return;
@@ -241,9 +320,10 @@ public class VentanaPrincipal extends JFrame {
 
         try {
             List<RegistroParqueo> registrosActivos = parqueoService.obtenerRegistrosActivos();
+            List<RegistroParqueo> historial = parqueoService.obtenerRegistrosHistorial();
 
             for (RegistroParqueo registro : registrosActivos) {
-                modeloTabla.addRow(new Object[]{
+                modeloActivos.addRow(new Object[]{
                     registro.getIdRegistro(),
                     registro.getVehiculo().getPlaca(),
                     registro.getVehiculo().getTipo(),
@@ -252,13 +332,27 @@ public class VentanaPrincipal extends JFrame {
                     registro.getEstado()
                 });
             }
+
+            for (RegistroParqueo registro : historial) {
+                modeloHistorial.addRow(new Object[]{
+                    registro.getIdRegistro(),
+                    registro.getVehiculo().getPlaca(),
+                    registro.getVehiculo().getTipo(),
+                    registro.getFechaEntrada() + " " + registro.getHoraEntrada(),
+                    registro.getFechaSalida() + " " + registro.getHoraSalida(),
+                    registro.getMinutosTotales(),
+                    formatearColones(registro.getMontoPagado()),
+                    registro.getEstado()
+                });
+            }
         } catch (IOException ex) {
-            mostrarMensaje("No fue posible cargar la tabla de ingresos.", false);
+            mostrarMensaje("No fue posible cargar la informacion del sistema.", false);
         }
     }
 
-    private void limpiarTabla() {
-        modeloTabla.setRowCount(0);
+    private void limpiarTablas() {
+        modeloActivos.setRowCount(0);
+        modeloHistorial.setRowCount(0);
     }
 
     private void limpiarFormulario() {
@@ -267,8 +361,30 @@ public class VentanaPrincipal extends JFrame {
         txtPlaca.requestFocusInWindow();
     }
 
+    private void seleccionarVehiculoActivo() {
+        int filaSeleccionada = tblVehiculosActivos.getSelectedRow();
+
+        if (filaSeleccionada >= 0) {
+            idRegistroSeleccionado = Integer.parseInt(
+                    modeloActivos.getValueAt(filaSeleccionada, 0).toString());
+            String placa = modeloActivos.getValueAt(filaSeleccionada, 1).toString();
+            lblSeleccion.setText("Vehiculo seleccionado para salida: " + placa
+                    + " (ID " + idRegistroSeleccionado + ")");
+        }
+    }
+
+    private void limpiarSeleccion() {
+        idRegistroSeleccionado = -1;
+        tblVehiculosActivos.clearSelection();
+        lblSeleccion.setText("Vehiculo seleccionado para salida: ninguno");
+    }
+
     private void mostrarMensaje(String mensaje, boolean exito) {
         lblEstado.setText(mensaje);
         lblEstado.setForeground(exito ? new Color(28, 95, 64) : new Color(170, 51, 51));
+    }
+
+    private String formatearColones(double monto) {
+        return "₡" + String.format("%.0f", monto);
     }
 }
