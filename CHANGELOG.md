@@ -37,3 +37,9 @@
 - El monto se calcula con base en los minutos ingresados por el usuario.
 - Se conserva la tarifa de `CRC 500` por hora o fraccion.
 - El tiempo de permanencia se guarda en el historial del sistema.
+
+## v1.4
+
+- Se mejora visualmente la ventana principal del sistema.
+- Se refinan colores, botones, tarjetas de resumen y apariencia de tablas.
+- Se mantiene intacta la arquitectura por capas y la logica del proyecto.

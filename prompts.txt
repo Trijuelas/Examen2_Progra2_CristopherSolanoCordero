@@ -96,7 +96,7 @@ Resumen de prompts solicitados por el usuario:
 - El sistema calcula el cobro con base en esos minutos y guarda el tiempo en el historial.
 
 Estado final del proyecto:
-- Version actual: `v1.3`
+- Version actual: `v1.4`
 - Arquitectura por capas conservada.
 - Interfaz Swing funcional.
 - Persistencia en archivos `.txt`.

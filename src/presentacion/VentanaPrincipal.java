@@ -6,6 +6,7 @@ import java.awt.Color;
 import java.awt.Dimension;
 import java.awt.FlowLayout;
 import java.awt.Font;
+import java.awt.Cursor;
 import java.awt.GridBagConstraints;
 import java.awt.GridBagLayout;
 import java.awt.GridLayout;
@@ -30,6 +31,16 @@ import logica.ParqueoService;
 
 public class VentanaPrincipal extends JFrame {
 
+    private static final Color COLOR_FONDO = new Color(239, 244, 248);
+    private static final Color COLOR_TARJETA = Color.WHITE;
+    private static final Color COLOR_BORDE = new Color(210, 220, 228);
+    private static final Color COLOR_PRIMARIO = new Color(18, 62, 92);
+    private static final Color COLOR_SECUNDARIO = new Color(73, 118, 146);
+    private static final Color COLOR_EXITO = new Color(46, 125, 90);
+    private static final Color COLOR_ADVERTENCIA = new Color(196, 118, 37);
+    private static final Color COLOR_PELIGRO = new Color(170, 63, 63);
+    private static final Color COLOR_TEXTO = new Color(45, 57, 68);
+    private static final Color COLOR_SUBTEXTO = new Color(96, 108, 120);
     private final JTextField txtPlaca;
     private final JTextField txtMinutosSalida;
     private final JComboBox<String> cmbTipoVehiculo;
@@ -98,7 +109,7 @@ public class VentanaPrincipal extends JFrame {
         setMinimumSize(new Dimension(980, 620));
         setLocationRelativeTo(null);
         setLayout(new BorderLayout(16, 16));
-        getContentPane().setBackground(new Color(241, 245, 248));
+        getContentPane().setBackground(COLOR_FONDO);
 
         add(construirEncabezado(), BorderLayout.NORTH);
         add(construirContenidoCentral(), BorderLayout.CENTER);
@@ -107,21 +118,26 @@ public class VentanaPrincipal extends JFrame {
 
     private JPanel construirEncabezado() {
         JPanel panel = new JPanel(new BorderLayout());
-        panel.setBackground(new Color(24, 63, 95));
-        panel.setBorder(BorderFactory.createEmptyBorder(20, 26, 20, 26));
+        panel.setBackground(COLOR_PRIMARIO);
+        panel.setBorder(BorderFactory.createEmptyBorder(22, 28, 22, 28));
 
         JLabel lblTitulo = new JLabel("Sistema de Parqueo Publico");
         lblTitulo.setFont(new Font("Segoe UI", Font.BOLD, 24));
         lblTitulo.setForeground(Color.WHITE);
 
-        JLabel lblSubtitulo = new JLabel("Version 1.3 - Salida con tiempo manual y calculo de cobro");
+        JLabel lblSubtitulo = new JLabel("Version 1.3 - Panel de control del parqueo");
         lblSubtitulo.setFont(new Font("Segoe UI", Font.PLAIN, 14));
         lblSubtitulo.setForeground(new Color(214, 231, 242));
+
+        JLabel lblDescripcion = new JLabel("Registro de ingresos, salidas, cobros e historial desde una sola ventana.");
+        lblDescripcion.setFont(new Font("Segoe UI", Font.PLAIN, 13));
+        lblDescripcion.setForeground(new Color(194, 215, 230));
 
         JPanel texto = new JPanel(new BorderLayout());
         texto.setOpaque(false);
         texto.add(lblTitulo, BorderLayout.NORTH);
-        texto.add(lblSubtitulo, BorderLayout.SOUTH);
+        texto.add(lblSubtitulo, BorderLayout.CENTER);
+        texto.add(lblDescripcion, BorderLayout.SOUTH);
 
         panel.add(texto, BorderLayout.WEST);
         return panel;
@@ -138,10 +154,10 @@ public class VentanaPrincipal extends JFrame {
 
     private JPanel construirPanelFormulario() {
         JPanel panelFormulario = new JPanel(new GridBagLayout());
-        panelFormulario.setBackground(Color.WHITE);
+        panelFormulario.setBackground(COLOR_TARJETA);
         panelFormulario.setBorder(BorderFactory.createCompoundBorder(
-                BorderFactory.createLineBorder(new Color(202, 213, 222)),
-                BorderFactory.createEmptyBorder(20, 20, 20, 20)
+                BorderFactory.createLineBorder(COLOR_BORDE),
+                BorderFactory.createEmptyBorder(22, 22, 22, 22)
         ));
         panelFormulario.setPreferredSize(new Dimension(340, 520));
 
@@ -153,83 +169,91 @@ public class VentanaPrincipal extends JFrame {
         gbc.insets = new Insets(8, 0, 8, 0);
         gbc.weightx = 1.0;
 
-        JLabel lblSeccion = new JLabel("Acciones del sistema");
+        JLabel lblSeccion = new JLabel("Panel de acciones");
         lblSeccion.setFont(new Font("Segoe UI", Font.BOLD, 18));
+        lblSeccion.setForeground(COLOR_TEXTO);
         panelFormulario.add(lblSeccion, gbc);
 
         gbc.gridy++;
         JLabel lblPlaca = new JLabel("Placa");
         lblPlaca.setFont(new Font("Segoe UI", Font.PLAIN, 14));
+        lblPlaca.setForeground(COLOR_TEXTO);
         panelFormulario.add(lblPlaca, gbc);
 
         gbc.gridy++;
         txtPlaca.setFont(new Font("Segoe UI", Font.PLAIN, 14));
+        txtPlaca.setBorder(BorderFactory.createCompoundBorder(
+                BorderFactory.createLineBorder(new Color(196, 206, 214)),
+                BorderFactory.createEmptyBorder(8, 10, 8, 10)
+        ));
         panelFormulario.add(txtPlaca, gbc);
 
         gbc.gridy++;
         JLabel lblTipo = new JLabel("Tipo de vehiculo");
         lblTipo.setFont(new Font("Segoe UI", Font.PLAIN, 14));
+        lblTipo.setForeground(COLOR_TEXTO);
         panelFormulario.add(lblTipo, gbc);
 
         gbc.gridy++;
         cmbTipoVehiculo.setFont(new Font("Segoe UI", Font.PLAIN, 14));
+        cmbTipoVehiculo.setBackground(Color.WHITE);
         panelFormulario.add(cmbTipoVehiculo, gbc);
 
         gbc.gridy++;
         JLabel lblAyuda = new JLabel("<html>La entrada se registra automaticamente. Para la salida, selecciona un vehiculo e indica los minutos de permanencia.</html>");
         lblAyuda.setFont(new Font("Segoe UI", Font.PLAIN, 13));
-        lblAyuda.setForeground(new Color(88, 103, 117));
+        lblAyuda.setForeground(COLOR_SUBTEXTO);
         panelFormulario.add(lblAyuda, gbc);
 
         gbc.gridy++;
         JButton btnRegistrar = new JButton("Registrar ingreso");
-        btnRegistrar.setFont(new Font("Segoe UI", Font.BOLD, 14));
-        btnRegistrar.setBackground(new Color(47, 127, 92));
-        btnRegistrar.setForeground(Color.WHITE);
-        btnRegistrar.setFocusPainted(false);
+        aplicarEstiloBoton(btnRegistrar, COLOR_EXITO);
         btnRegistrar.addActionListener(e -> registrarIngreso());
         panelFormulario.add(btnRegistrar, gbc);
 
         gbc.gridy++;
         JLabel lblMinutosSalida = new JLabel("Minutos de permanencia");
         lblMinutosSalida.setFont(new Font("Segoe UI", Font.PLAIN, 14));
+        lblMinutosSalida.setForeground(COLOR_TEXTO);
         panelFormulario.add(lblMinutosSalida, gbc);
 
         gbc.gridy++;
         txtMinutosSalida.setFont(new Font("Segoe UI", Font.PLAIN, 14));
+        txtMinutosSalida.setBorder(BorderFactory.createCompoundBorder(
+                BorderFactory.createLineBorder(new Color(196, 206, 214)),
+                BorderFactory.createEmptyBorder(8, 10, 8, 10)
+        ));
         panelFormulario.add(txtMinutosSalida, gbc);
 
         gbc.gridy++;
         JButton btnSalida = new JButton("Registrar salida");
-        btnSalida.setFont(new Font("Segoe UI", Font.BOLD, 14));
-        btnSalida.setBackground(new Color(190, 109, 42));
-        btnSalida.setForeground(Color.WHITE);
-        btnSalida.setFocusPainted(false);
+        aplicarEstiloBoton(btnSalida, COLOR_ADVERTENCIA);
         btnSalida.addActionListener(e -> registrarSalida());
         panelFormulario.add(btnSalida, gbc);
 
         gbc.gridy++;
         JButton btnEliminarHistorial = new JButton("Eliminar historial");
-        btnEliminarHistorial.setFont(new Font("Segoe UI", Font.BOLD, 14));
-        btnEliminarHistorial.setBackground(new Color(165, 54, 54));
-        btnEliminarHistorial.setForeground(Color.WHITE);
-        btnEliminarHistorial.setFocusPainted(false);
+        aplicarEstiloBoton(btnEliminarHistorial, COLOR_PELIGRO);
         btnEliminarHistorial.addActionListener(e -> eliminarRegistroHistorial());
         panelFormulario.add(btnEliminarHistorial, gbc);
 
         gbc.gridy++;
         lblSeleccionActivo.setFont(new Font("Segoe UI", Font.PLAIN, 13));
-        lblSeleccionActivo.setForeground(new Color(76, 86, 96));
+        lblSeleccionActivo.setForeground(COLOR_SECUNDARIO);
         panelFormulario.add(lblSeleccionActivo, gbc);
 
         gbc.gridy++;
         lblSeleccionHistorial.setFont(new Font("Segoe UI", Font.PLAIN, 13));
-        lblSeleccionHistorial.setForeground(new Color(76, 86, 96));
+        lblSeleccionHistorial.setForeground(COLOR_SECUNDARIO);
         panelFormulario.add(lblSeleccionHistorial, gbc);
 
         gbc.gridy++;
         lblMontoSalida.setFont(new Font("Segoe UI", Font.BOLD, 13));
-        lblMontoSalida.setForeground(new Color(95, 60, 20));
+        lblMontoSalida.setForeground(COLOR_ADVERTENCIA);
+        lblMontoSalida.setBorder(BorderFactory.createCompoundBorder(
+                BorderFactory.createLineBorder(new Color(235, 214, 188)),
+                BorderFactory.createEmptyBorder(10, 12, 10, 12)
+        ));
         panelFormulario.add(lblMontoSalida, gbc);
 
         gbc.gridy++;
@@ -243,26 +267,23 @@ public class VentanaPrincipal extends JFrame {
 
     private JPanel construirPanelTablas() {
         JPanel panelTablas = new JPanel(new BorderLayout(10, 10));
-        panelTablas.setBackground(Color.WHITE);
+        panelTablas.setBackground(COLOR_TARJETA);
         panelTablas.setBorder(BorderFactory.createCompoundBorder(
-                BorderFactory.createLineBorder(new Color(202, 213, 222)),
+                BorderFactory.createLineBorder(COLOR_BORDE),
                 BorderFactory.createEmptyBorder(20, 20, 20, 20)
         ));
 
         JPanel encabezado = new JPanel(new BorderLayout());
         encabezado.setOpaque(false);
 
-        JLabel lblTabla = new JLabel("Control de parqueo");
+        JLabel lblTabla = new JLabel("Vista general del parqueo");
         lblTabla.setFont(new Font("Segoe UI", Font.BOLD, 18));
+        lblTabla.setForeground(COLOR_TEXTO);
 
         JPanel resumen = new JPanel(new GridLayout(1, 2, 12, 0));
         resumen.setOpaque(false);
-        lblResumenActivos.setFont(new Font("Segoe UI", Font.BOLD, 13));
-        lblResumenActivos.setForeground(new Color(24, 63, 95));
-        lblResumenHistorial.setFont(new Font("Segoe UI", Font.BOLD, 13));
-        lblResumenHistorial.setForeground(new Color(112, 61, 16));
-        resumen.add(lblResumenActivos);
-        resumen.add(lblResumenHistorial);
+        resumen.add(crearTarjetaResumen(lblResumenActivos, new Color(230, 240, 247), COLOR_PRIMARIO));
+        resumen.add(crearTarjetaResumen(lblResumenHistorial, new Color(247, 239, 228), COLOR_ADVERTENCIA));
 
         encabezado.add(lblTabla, BorderLayout.WEST);
         encabezado.add(resumen, BorderLayout.EAST);
@@ -271,6 +292,11 @@ public class VentanaPrincipal extends JFrame {
         tblVehiculosActivos.getTableHeader().setReorderingAllowed(false);
         tblVehiculosActivos.setFont(new Font("Segoe UI", Font.PLAIN, 13));
         tblVehiculosActivos.getTableHeader().setFont(new Font("Segoe UI", Font.BOLD, 13));
+        tblVehiculosActivos.setGridColor(new Color(229, 235, 239));
+        tblVehiculosActivos.setSelectionBackground(new Color(218, 232, 242));
+        tblVehiculosActivos.setSelectionForeground(COLOR_TEXTO);
+        tblVehiculosActivos.getTableHeader().setBackground(new Color(230, 238, 244));
+        tblVehiculosActivos.getTableHeader().setForeground(COLOR_TEXTO);
         tblVehiculosActivos.addMouseListener(new MouseAdapter() {
             @Override
             public void mouseClicked(MouseEvent e) {
@@ -282,6 +308,11 @@ public class VentanaPrincipal extends JFrame {
         tblHistorial.getTableHeader().setReorderingAllowed(false);
         tblHistorial.setFont(new Font("Segoe UI", Font.PLAIN, 13));
         tblHistorial.getTableHeader().setFont(new Font("Segoe UI", Font.BOLD, 13));
+        tblHistorial.setGridColor(new Color(229, 235, 239));
+        tblHistorial.setSelectionBackground(new Color(243, 231, 214));
+        tblHistorial.setSelectionForeground(COLOR_TEXTO);
+        tblHistorial.getTableHeader().setBackground(new Color(230, 238, 244));
+        tblHistorial.getTableHeader().setForeground(COLOR_TEXTO);
         tblHistorial.addMouseListener(new MouseAdapter() {
             @Override
             public void mouseClicked(MouseEvent e) {
@@ -312,7 +343,7 @@ public class VentanaPrincipal extends JFrame {
 
         lblEstado.setHorizontalAlignment(SwingConstants.LEFT);
         lblEstado.setFont(new Font("Segoe UI", Font.PLAIN, 13));
-        lblEstado.setForeground(new Color(28, 95, 64));
+        lblEstado.setForeground(COLOR_EXITO);
 
         panelPie.add(lblEstado);
         return panelPie;
@@ -476,10 +507,29 @@ public class VentanaPrincipal extends JFrame {
 
     private void mostrarMensaje(String mensaje, boolean exito) {
         lblEstado.setText(mensaje);
-        lblEstado.setForeground(exito ? new Color(28, 95, 64) : new Color(170, 51, 51));
+        lblEstado.setForeground(exito ? COLOR_EXITO : COLOR_PELIGRO);
     }
 
     private String formatearColones(double monto) {
         return "CRC " + String.format("%.0f", monto);
+    }
+
+    private void aplicarEstiloBoton(JButton boton, Color colorFondo) {
+        boton.setFont(new Font("Segoe UI", Font.BOLD, 14));
+        boton.setBackground(colorFondo);
+        boton.setForeground(Color.WHITE);
+        boton.setFocusPainted(false);
+        boton.setBorder(BorderFactory.createEmptyBorder(10, 14, 10, 14));
+        boton.setCursor(new Cursor(Cursor.HAND_CURSOR));
+    }
+
+    private JPanel crearTarjetaResumen(JLabel etiqueta, Color fondo, Color colorTexto) {
+        JPanel panel = new JPanel(new FlowLayout(FlowLayout.CENTER, 12, 8));
+        panel.setBackground(fondo);
+        panel.setBorder(BorderFactory.createLineBorder(new Color(214, 223, 230)));
+        etiqueta.setFont(new Font("Segoe UI", Font.BOLD, 13));
+        etiqueta.setForeground(colorTexto);
+        panel.add(etiqueta);
+        return panel;
     }
 }

@@ -93,6 +93,7 @@ ExamenParqueo/
 - `v1.1`: registro de salida, calculo de cobro, historial de vehiculos y persistencia ampliada.
 - `v1.2`: mejora visual de la interfaz, validaciones mas estrictas y eliminacion de registros historicos.
 - `v1.3`: salida con tiempo manual en minutos y calculo de cobro segun el tiempo indicado.
+- `v1.4`: mejora visual de la ventana principal con una presentacion mas moderna e interactiva.
 
 ## 11. Autor
 
